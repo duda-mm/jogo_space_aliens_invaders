@@ -4,6 +4,8 @@ pygame.init()
 screen = pygame.display.set_mode((640, 480))
 clock = pygame.time.Clock()
 
+velocidade_aliens = 2.5
+
 fonte_pixel_grande = pygame.font.Font("Minecraftia-Regular.ttf", 23)
 fonte_pixel_micro = pygame.font.Font("Minecraftia-Regular.ttf", 20)
 
@@ -16,25 +18,45 @@ def criar_aliens():
         for coluna in range(8):
             x = 60 + coluna * 60 
             y = 60 + linha * 60  
-            aliens.append((x, y))
+            aliens.append([x, y, linha])
     return aliens
 
 def desenhar_aliens(tela, aliens):
     for alien in aliens:
         tela.blit(alien_img, (alien[0], alien[1]))
 
+def mover_aliens(aliens, direcoes):
+    for alien in aliens:
+        linha = alien[2]
+        alien[0] += direcoes[linha] * velocidade_aliens
+
+    limites = {0: [], 1: [], 2: []}
+
+    for alien in aliens:
+        linha = alien[2]
+        limites[linha].append(alien[0])
+
+    for linha in range(3):
+        limite_direita = max(limites[linha]) + alien_img.get_width()
+        limite_esquerda = min(limites[linha])
+        if limite_direita >= 640 or limite_esquerda <= 0:
+            direcoes[linha] *= -1
+
+    return direcoes
+
 def jogo():
-    tela_jogo = pygame.display.set_mode((640, 480))
     aliens = criar_aliens()
+    direcoes = {0: 1, 1: -1, 2: 1}
     rodando = True
     while rodando:
-        tela_jogo.fill((0, 0, 0)) 
+        screen.fill((0, 0, 0)) 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
         
-        desenhar_aliens(tela_jogo, aliens)
+        direcoes = mover_aliens(aliens, direcoes)
+        desenhar_aliens(screen, aliens)
         pygame.display.flip()
         clock.tick(60)
 
@@ -57,7 +79,7 @@ while executando:
     desenhar_texto("Derrote os aliens inimigos", fonte_pixel_grande, 50)
     desenhar_texto("antes que o tempo acabe", fonte_pixel_grande, 80)
     desenhar_texto("e vença o jogo!", fonte_pixel_grande, 107)
-    desenhar_texto("Você está pronto(a) para a batalha?", fonte_pixel_grande, 350)
+    desenhar_texto("Você está pronto (a) para a batalha?", fonte_pixel_grande, 350)
     desenhar_texto("Clique ENTER para começar o jogo", fonte_pixel_micro, 390)
     
     alien = pygame.image.load("alien.png").convert_alpha()
