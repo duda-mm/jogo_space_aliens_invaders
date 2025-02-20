@@ -10,7 +10,10 @@ fonte_pixel_grande = pygame.font.Font("Minecraftia-Regular.ttf", 23)
 fonte_pixel_micro = pygame.font.Font("Minecraftia-Regular.ttf", 20)
 
 alien_img = pygame.image.load("alien.png").convert_alpha()
-alien_img = pygame.transform.scale(alien_img, (int(474/10), int(353/10))) 
+alien_img = pygame.transform.scale(alien_img, (int(474/10), int(353/10)))
+
+nave_img = pygame.image.load("nave.png").convert_alpha()
+nave_img = pygame.transform.scale(nave_img, (int(484/10), int(515/10)))
 
 def criar_aliens():
     aliens = []
@@ -47,6 +50,8 @@ def mover_aliens(aliens, direcoes):
 def jogo():
     aliens = criar_aliens()
     direcoes = {0: 1, 1: -1, 2: 1}
+    nave_x = (640 // 2) - (nave_img.get_width() // 2)
+    nave_y = 480 - nave_img.get_height() - 10
     rodando = True
     while rodando:
         screen.fill((0, 0, 0)) 
@@ -55,8 +60,15 @@ def jogo():
                 pygame.quit()
                 exit()
         
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT] and nave_x > 0:
+            nave_x -= 5  
+        if keys[pygame.K_RIGHT] and nave_x < 640 - nave_img.get_width():
+            nave_x += 5  
+
         direcoes = mover_aliens(aliens, direcoes)
         desenhar_aliens(screen, aliens)
+        screen.blit(nave_img, (nave_x, nave_y))
         pygame.display.flip()
         clock.tick(60)
 
