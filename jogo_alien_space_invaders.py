@@ -1,4 +1,5 @@
 import pygame
+import random
 
 pygame.init()
 screen = pygame.display.set_mode((640, 480))
@@ -10,17 +11,41 @@ fonte_pixel_grande = pygame.font.Font("Minecraftia-Regular.ttf", 23)
 fonte_pixel_micro = pygame.font.Font("Minecraftia-Regular.ttf", 20)
 
 alien_img = pygame.image.load("alien.png").convert_alpha()
-alien_img = pygame.transform.scale(alien_img, (int(474/10), int(353/10)))
+alien_img = pygame.transform.scale(alien_img, (int(474/12), int(353/12)))
 
 nave_img = pygame.image.load("nave.png").convert_alpha()
 nave_img = pygame.transform.scale(nave_img, (int(484/10), int(515/10)))
+
+bombas_img = pygame.image.load("bomba.png").convert_alpha()
+bombas_img = pygame.transform.scale(bombas_img, (int(499/12), int(499/12)))
+
+bombas = []
+def alien_atirar(aliens, bombas):
+    if random.randint(0, 100) < 2: 
+        alien_aleatorio = random.choice(aliens)
+        x = alien_aleatorio[0] + alien_img.get_width() // 2
+        y = alien_aleatorio[1] + alien_img.get_height()
+        bombas.append([x, y])
+
+def mover_bombas(bombas, nave_x, nave_y):
+    for bomba in bombas[:]:
+        bomba[1] += 5
+        screen.blit(bombas_img, (bomba[0], bomba[1]))
+
+        if (
+            nave_x < bomba[0] < nave_x + nave_img.get_width()
+            and nave_y < bomba[1] < nave_y + nave_img.get_height()
+        ):
+            bombas.remove(bomba)
+        elif bomba[1] > 480:
+            bombas.remove(bomba)
 
 def criar_aliens():
     aliens = []
     for linha in range(3):  
         for coluna in range(8):
-            x = 60 + coluna * 60 
-            y = 60 + linha * 60  
+            x = 30 + coluna * 60 
+            y = 30 + linha * 60  
             aliens.append([x, y, linha])
     return aliens
 
@@ -68,6 +93,8 @@ def jogo():
 
         direcoes = mover_aliens(aliens, direcoes)
         desenhar_aliens(screen, aliens)
+        alien_atirar(aliens, bombas)
+        mover_bombas(bombas, nave_x, nave_y)
         screen.blit(nave_img, (nave_x, nave_y))
         pygame.display.flip()
         clock.tick(60)
