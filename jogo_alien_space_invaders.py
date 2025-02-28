@@ -235,8 +235,8 @@ def jogo():
 
         tempo_atual = time.time()
         tempo_decorrido = tempo_atual - tempo_inicial
-        if tempo_decorrido >= 15 or vidas <= 0 or not aliens:
-            if tempo_decorrido >= 15:
+        if tempo_decorrido >= 13 or vidas <= 0 or not aliens:
+            if tempo_decorrido >= 13:
                 tempo_esgotado()  
             elif vidas <= 0:
                 game_over()  
