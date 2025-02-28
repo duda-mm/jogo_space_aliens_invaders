@@ -116,17 +116,14 @@ def desenhar_texto(texto, fonte, y):
     screen.blit(surface_texto, (x, y))
 
 def game_over():
-    game_over_screen = pygame.display.set_mode((640, 480))
-    fonte = pygame.font.Font(None, 50)
-
     while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     exit()
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_r:
-                        jogo()
+                    if event.key == pygame.K_RETURN:
+                        reiniciar_jogo()
                         return
             screen.fill((0, 0, 0))
             desenhar_texto("Oh não!", fonte_pixel_grande, 70)
@@ -142,6 +139,14 @@ def game_over():
             screen.blit(alien, (x_centro, y_centro))
             pygame.display.flip()
             clock.tick(60)
+
+def reiniciar_jogo():
+    global tiros, bombas, vidas
+    tiros = []
+    bombas = []
+    vidas = 3
+    jogo()
+
 def jogo():
     aliens = criar_aliens()
     direcoes = {0: 1, 1: -1, 2: 1}
@@ -176,6 +181,10 @@ def jogo():
         screen.blit(nave_img, (nave_x, nave_y))
         pygame.display.flip()
         clock.tick(60)
+
+        if vidas <= 0:
+            game_over()
+            rodando = False
 
 def desenhar_texto(texto, fonte, y):
     surface_texto = fonte.render(texto, True, 'white')
