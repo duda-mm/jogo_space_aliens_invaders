@@ -110,6 +110,11 @@ def mover_aliens(aliens, direcoes):
                 direcoes[linha] *= -1
     return direcoes
 
+def desenhar_texto(texto, fonte, y):
+    surface_texto = fonte.render(texto, True, 'white')
+    x = (640 // 2) - surface_texto.get_width() // 2
+    screen.blit(surface_texto, (x, y))
+
 def game_over():
     game_over_screen = pygame.display.set_mode((640, 480))
     fonte = pygame.font.Font(None, 50)
@@ -123,7 +128,20 @@ def game_over():
                     if event.key == pygame.K_r:
                         jogo()
                         return
+            screen.fill((0, 0, 0))
+            desenhar_texto("Oh não!", fonte_pixel_grande, 70)
+            desenhar_texto("Os aliens te derrotaram...", fonte_pixel_grande, 107)
+            desenhar_texto("Quer jogar novamente?", fonte_pixel_grande, 350)
+            desenhar_texto("Clique ENTER para recomeçar o jogo", fonte_pixel_micro, 390)
 
+            alien = pygame.image.load("alien.png").convert_alpha()
+            alien = pygame.transform.scale(alien, (int(474/2.5), int(353/2.5)))
+            x_centro = (640 // 2)-(alien.get_width() // 2)
+            y_centro = (480 // 2)-(alien.get_height() // 2)
+
+            screen.blit(alien, (x_centro, y_centro))
+            pygame.display.flip()
+            clock.tick(60)
 def jogo():
     aliens = criar_aliens()
     direcoes = {0: 1, 1: -1, 2: 1}
