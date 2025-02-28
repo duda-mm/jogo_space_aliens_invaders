@@ -1,5 +1,6 @@
 import pygame
 import random
+import time
 
 pygame.init()
 screen = pygame.display.set_mode((640, 480))
@@ -126,6 +127,7 @@ def game_over():
                         reiniciar_jogo()
                         return
             screen.fill((0, 0, 0))
+
             desenhar_texto("Oh não!", fonte_pixel_grande, 70)
             desenhar_texto("Os aliens te derrotaram...", fonte_pixel_grande, 107)
             desenhar_texto("Quer jogar novamente?", fonte_pixel_grande, 350)
@@ -139,6 +141,31 @@ def game_over():
             screen.blit(alien, (x_centro, y_centro))
             pygame.display.flip()
             clock.tick(60)
+
+def tempo_esgotado():
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    reiniciar_jogo()
+                    return
+        screen.fill((0, 0, 0))
+        desenhar_texto("Tempo esgotado!", fonte_pixel_grande, 70)
+        desenhar_texto("Você não derrotou os aliens a tempo...", fonte_pixel_grande, 107)
+        desenhar_texto("Quer jogar novamente?", fonte_pixel_grande, 350)
+        desenhar_texto("Clique ENTER para recomeçar o jogo", fonte_pixel_micro, 390)
+
+        alien = pygame.image.load("alien.png").convert_alpha()
+        alien = pygame.transform.scale(alien, (int(474/2.5), int(353/2.5)))
+        x_centro = (640 // 2)-(alien.get_width() // 2)
+        y_centro = (480 // 2)-(alien.get_height() // 2)
+
+        screen.blit(alien, (x_centro, y_centro))
+        pygame.display.flip()
+        clock.tick(60)
 
 def reiniciar_jogo():
     global tiros, bombas, vidas
@@ -154,6 +181,7 @@ def jogo():
     nave_y = 480 - nave_img.get_height() - 10
     vidas = 3
     rodando = True
+    tempo_inicial = time.time()
 
     while rodando:
         screen.fill((0, 0, 0)) 
@@ -179,12 +207,18 @@ def jogo():
         vidas = mover_bombas(bombas, nave_x, nave_y, vidas)
         desenhar_vidas(screen, vidas)
         screen.blit(nave_img, (nave_x, nave_y))
+
+        tempo_atual = time.time()
+        tempo_decorrido = tempo_atual - tempo_inicial
+        if tempo_decorrido >= 20 or vidas <= 0:
+            if tempo_decorrido >= 20:
+                tempo_esgotado()  
+            else:
+                game_over()  
+            rodando = False
+
         pygame.display.flip()
         clock.tick(60)
-
-        if vidas <= 0:
-            game_over()
-            rodando = False
 
 def desenhar_texto(texto, fonte, y):
     surface_texto = fonte.render(texto, True, 'white')
