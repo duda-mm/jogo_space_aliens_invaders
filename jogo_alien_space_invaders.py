@@ -167,6 +167,31 @@ def tempo_esgotado():
         pygame.display.flip()
         clock.tick(60)
 
+def tela_vitoria():
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    reiniciar_jogo()
+                    return
+        screen.fill((0, 0, 0))
+        desenhar_texto("Parabéns!", fonte_pixel_grande, 70)
+        desenhar_texto("Você derrotou todos os aliens!", fonte_pixel_grande, 107)
+        desenhar_texto("Quer jogar novamente?", fonte_pixel_grande, 350)
+        desenhar_texto("Clique ENTER para começar o jogo", fonte_pixel_micro, 390)
+
+        nave = pygame.image.load("nave.png").convert_alpha()
+        nave = pygame.transform.scale(nave, (int(484/3.5), int(515/3.5)))
+        x_centro = (640 // 2)-(nave.get_width() // 2)
+        y_centro = (480 // 2)-(nave.get_height() // 2)
+
+        screen.blit(nave, (x_centro, y_centro))
+        pygame.display.flip()
+        clock.tick(60)
+
 def reiniciar_jogo():
     global tiros, bombas, vidas
     tiros = []
@@ -210,11 +235,13 @@ def jogo():
 
         tempo_atual = time.time()
         tempo_decorrido = tempo_atual - tempo_inicial
-        if tempo_decorrido >= 20 or vidas <= 0:
+        if tempo_decorrido >= 20 or vidas <= 0 or not aliens:
             if tempo_decorrido >= 20:
                 tempo_esgotado()  
-            else:
+            elif vidas <= 0:
                 game_over()  
+            else:
+                tela_vitoria()  
             rodando = False
 
         pygame.display.flip()
