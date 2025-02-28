@@ -22,13 +22,37 @@ bombas_img = pygame.transform.scale(bombas_img, (int(499/12), int(499/12)))
 vidas_img = pygame.image.load("vida.png").convert_alpha()
 vidas_img = pygame.transform.scale(vidas_img, (int(360/12), int(360/12)))
 
+tiro_img = pygame.image.load("tiro_nave.png").convert_alpha()
+tiro_img = pygame.transform.scale(tiro_img, (int(30/6), int(85/6)))
+
+tiros = []
+bombas = []
+
+def atirar(nave_x, nave_y):
+    x = nave_x + nave_img.get_width() // 2 - tiro_img.get_width() // 2
+    y = nave_y
+    tiros.append([x, y])
+
+def mover_tiros(tiros, aliens):
+    for tiro in tiros[:]:
+        tiro[1] -= 7  
+        screen.blit(tiro_img, (tiro[0], tiro[1]))
+
+        for alien in aliens[:]:
+            if alien[0] < tiro[0] < alien[0] + alien_img.get_width() and \
+               alien[1] < tiro[1] < alien[1] + alien_img.get_height():
+                aliens.remove(alien)
+                tiros.remove(tiro)
+                break 
+        if tiro[1] < 0:
+            tiros.remove(tiro)
+
 def desenhar_vidas(tela, vidas):
     for i in range(vidas):
         x = 10 + (i * 35)
         y = 10
         tela.blit(vidas_img, (x, y))
 
-bombas = []
 def alien_atirar(aliens, bombas):
     if random.randint(0, 100) < 3.5: 
         alien_aleatorio = random.choice(aliens)
@@ -41,17 +65,16 @@ def mover_bombas(bombas, nave_x, nave_y, vidas):
         bomba[1] += 5
         screen.blit(bombas_img, (bomba[0], bomba[1]))
 
-        if (
-            nave_x < bomba[0] < nave_x + nave_img.get_width()
-            and nave_y < bomba[1] < nave_y + nave_img.get_height()
-        ):
+        bomba_rect = pygame.Rect(bomba[0], bomba[1], bombas_img.get_width(), bombas_img.get_height())
+        nave_rect = pygame.Rect(nave_x, nave_y, nave_img.get_width(), nave_img.get_height())
+        
+        if bomba_rect.colliderect(nave_rect):  
             vidas -= 1
             bombas.remove(bomba)
             if vidas <= 0:
                 game_over() 
                 return vidas
-       
-        elif bomba[1] > 480:
+        elif bomba[1] > 480:  
             bombas.remove(bomba)
     return vidas
 
@@ -80,11 +103,11 @@ def mover_aliens(aliens, direcoes):
         limites[linha].append(alien[0])
 
     for linha in range(3):
-        limite_direita = max(limites[linha]) + alien_img.get_width()
-        limite_esquerda = min(limites[linha])
-        if limite_direita >= 640 or limite_esquerda <= 0:
-            direcoes[linha] *= -1
-
+        if limites[linha]:
+            limite_direita = max(limites[linha]) + alien_img.get_width()
+            limite_esquerda = min(limites[linha])
+            if limite_direita >= 640 or limite_esquerda <= 0:
+                direcoes[linha] *= -1
     return direcoes
 
 def game_over():
@@ -108,6 +131,7 @@ def jogo():
     nave_y = 480 - nave_img.get_height() - 10
     vidas = 3
     rodando = True
+
     while rodando:
         screen.fill((0, 0, 0)) 
 
@@ -115,7 +139,10 @@ def jogo():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-        
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE: 
+                    atirar(nave_x, nave_y) 
+
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT] and nave_x > 0:
             nave_x -= 5  
@@ -125,6 +152,7 @@ def jogo():
         direcoes = mover_aliens(aliens, direcoes)
         desenhar_aliens(screen, aliens)
         alien_atirar(aliens, bombas)
+        mover_tiros(tiros, aliens)
         vidas = mover_bombas(bombas, nave_x, nave_y, vidas)
         desenhar_vidas(screen, vidas)
         screen.blit(nave_img, (nave_x, nave_y))
